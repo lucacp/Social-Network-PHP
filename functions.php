@@ -1,14 +1,7 @@
 <?php
 session_start();
-$dbhost = 'localhost';
-$dbname = 'chatappdb';
-$dbuser = 'socials';
-$dbpass = 'socialpassword';
-$appname= 'CHATAPP';
 
-$connection = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
-if($connection->connect_error) die($connection->connect_error);
-
+$connection = require 'connect.php';
 
 function runthis($query)
 {
@@ -18,13 +11,22 @@ function runthis($query)
 	return $result;
 }
 
-// to make sure the string is safe to use in mysql
 function cleanup($var)
 {
-	global $connection;
 	$var = strip_tags($var);
 	$var = htmlentities($var);
 	$var = stripslashes($var);
-	return $connection->real_escape_string($var);
+	return escape_string($var);
 }
+function escape_string($param) {
+    if(is_array($param))
+        return array_map(__METHOD__, $param);
+
+    if(!empty($param) && is_string($param)) {
+        return str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $param);
+    }
+
+    return $param;
+}
+
 ?>
