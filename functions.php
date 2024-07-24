@@ -1,14 +1,21 @@
 <?php
 session_start();
 
-$connection = require 'connect.php';
-
-function runthis($query)
+require 'connect.php';
+$connection = getPDOConnection($config,$dbType);
+$sql 		= new Sql();
+function runthis($query,$param)
 {
 	global $connection;
-	$result = $connection->query($query);
-	if(!$result) die($connection->error);
-	return $result;
+	//$paramCount = count($param);
+	try{
+		$stmt = $connection->prepare($query);
+		$result = $stmt->execute($param);
+	} catch(\PDOException $e){ 
+		die($e->getMessage().'<br />');
+	}
+	return [$result,$stmt->rowCount()];
+	
 }
 
 function cleanup($var)
@@ -28,5 +35,15 @@ function escape_string($param) {
 
     return $param;
 }
-
-?>
+class Sql 
+{
+	function LoginMember(){
+		return 'SELECT user,pass FROM members WHERE user=:user AND pass=:pass';
+	}
+	function SignUpMember(){
+		return 'INSERT INTO members VALUES(:user, :pass)';	
+	}
+	function SignUpMemberExist(){
+		return 'SELECT * FROM members WHERE user=:user';
+	}
+}

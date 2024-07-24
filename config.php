@@ -1,9 +1,10 @@
 <?php
 
-$autoloadDir = './vendor/autoload.php';
+$autoloadDir = __DIR__.'\\vendor\\autoload.php';
 require $autoloadDir;
 
-$dotEnv = Dotenv\Dotenv::createImmutable($autoloadDir);
+$dotEnv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotEnv->load();
 //Bloco ChatGPT alterado
 $dbHost = $_ENV['DBHOST'];
 $dbName = $_ENV['DBNAME'];
@@ -22,12 +23,12 @@ return [
     ],
     'sqlite' => [
         'driver'   => 'sqlite',
-        'database' => __DIR__ . '/.'.$dbName.'.sqlite',
+        'database' => __DIR__ . '/'.$dbName.'.sqlite',
     ],
     'firebird' => [
         'driver'   => 'firebird',
         'host'     => $dbHost,
-        'database' => __DIR__ . '/.'.$dbName.'.fdb',
+        'database' => __DIR__ . '/'.$dbName.'.fdb',
         'username' => $dbUser,
         'password' => $dbPass,
     ],

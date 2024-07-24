@@ -23,14 +23,16 @@ if(isset($_POST['signuser']))
 	}
 	else
 	{
-		$result = runthis("SELECT * FROM members WHERE user = '$user'");
+		//$result = runthis("SELECT * FROM members WHERE user = '$user'");
+		$result = runthis($sql->SignUpMemberExist(),['user'=>$user]);
 		if($result->num_rows)
 		{
 			$error = "username already exists";
 		}
 		else
 		{
-			runthis("INSERT INTO members VALUES('$user', '$pass')");
+			//runthis("INSERT INTO members VALUES('$user', '$pass')");
+			runthis($sql->SignUpMember(),['user'=>$user,'pass'=>$pass]);
 			die("Account created. Please <a href='index.php'>Log In</a>")	;
 		}
 	}
@@ -46,8 +48,9 @@ if(isset($_POST['loginuser']))
 	}
 	else
 	{
-		$result = runthis("SELECT user,pass FROM members WHERE user='$user' AND pass='$pass'");
-		if($result->num_rows == 0)
+//		$result = runthis("SELECT user,pass FROM members WHERE user='$user' AND pass='$pass'");
+		$result = runthis($sql->LoginMember(),['user'=>$user,'pass'=>$pass]);
+		if($result == false)
 		{
 			$error = 'username or password is wrong';
 		}
