@@ -10,7 +10,7 @@ if(isset($_GET['view']))
 	$user = $_GET['view'];
 	$currentuser = $_SESSION['user'];
 	$otheruser = 1;
-	$followstatus = runthis("SELECT * FROM follower WHERE user1='$currentuser' AND user2='$user'");
+	$followstatus = runthis($sql->ViewFollowers(),['currentuser'=>$currentuser,'user'=>$user]);
 	if($followstatus->num_rows == 0) 
 	{
 		$isFollowing = 0;
@@ -60,15 +60,15 @@ if(isset($_FILES['gallerypic']['name']))
 {
 	$detectedType = exif_imagetype($_FILES['gallerypic']['tmp_name']);
 	$allowedTypes = array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF);
-	$result = runthis("SELECT * FROM photos WHERE user='$user'");
-	$row = $result->fetch_array(MYSQLI_ASSOC);
+	$result = runthis($sql->ViewPhotosFromUser(),['user'=>$user]);
+	$row = $result['fetch_array']->fetch();
 	$count = $row['count'];
 	$count = $count + 1;
 	$saveto = "pics/" . $user . "pic" . $count . ".jpg";
 	if(in_array($detectedType, $allowedTypes))
 	{
 		move_uploaded_file($_FILES['gallerypic']['tmp_name'], $saveto);
-		runthis("UPDATE photos SET count='$count' WHERE user = '$user'");
+		runthis($sql->UpdatePhotosCountUser(),['count'=>$count,'user'=>$user]);
 	}
 
 }
@@ -88,9 +88,9 @@ if(isset($_FILES['gallerypic']['name']))
 
 <?php
 
-	$result = runthis("SELECT * FROM photos WHERE user='$user'");
-	$row = $result->fetch_array(MYSQLI_ASSOC);
-	$num = $row['count'];
+	$result = runthis($sql->ViewPhotosFromUser(),['user'=>$user]);
+	$row = $result['fetch_array']->fetch();
+	$num = $result['num_rows'];
 	for($j = 1; $j <= $num; $j = $j + 1)
 	{
 		$addr = "pics/" . $user . "pic" . $j . ".jpg";

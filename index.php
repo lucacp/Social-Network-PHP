@@ -25,7 +25,7 @@ if(isset($_POST['signuser']))
 	{
 		//$result = runthis("SELECT * FROM members WHERE user = '$user'");
 		$result = runthis($sql->SignUpMemberExist(),['user'=>$user]);
-		if($result->num_rows)
+		if($result == true)
 		{
 			$error = "username already exists";
 		}

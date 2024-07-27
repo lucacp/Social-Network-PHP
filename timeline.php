@@ -5,28 +5,23 @@ echo "<div class='postcontainer'>";
 echo "<div class='timelineform'>";
 echo "<br>Welcome <strong>$user</strong>.<br><br>";
 
-if(isset($_POST['content']) && isset($_FILES['photo']['name']))
-{
-	$getcount = runthis("SELECT * FROM photos WHERE user='$user'");
-	$getcountrow = $getcount->fetch_array(MYSQLI_ASSOC);
-	$count = $getcountrow['count'];
+if(isset($_POST['content']) && isset($_FILES['photo']['name'])){
+	$getcount = runthis($sql->ViewPhotosFromUser(),['user'=>$user]);
+	$getcountrow = $getcount['fetch_array']->fetch(PDO::FETCH_BOTH,0);
+	$count = $getcountrow==true?$getcountrow->count:0;
 	$count = $count + 1;
 	$saveto = "pics/" . $user . "pic" . $count . ".jpg";
 	$detectedType = exif_imagetype($_FILES['photo']['tmp_name']);
 	$allowedTypes = array(IMAGETYPE_JPEG, IMAGETYPE_PNG);
-	if(in_array($detectedType, $allowedTypes))
-	{
+	if(in_array($detectedType, $allowedTypes)){
 		move_uploaded_file($_FILES['photo']['tmp_name'], $saveto);
-		runthis("UPDATE photos SET count='$count' WHERE user='$user'");
+		$result  = runthis($sql->UpdatePhotosCountUser(),['count'=>$count,'user'=>$user]);
+		$result  = $result['result']==false?runthis($sql->CreatePhotosCountUser(),['count'=>$count,'user'=>$user]):true;
 		$content = cleanup($_POST['content']);
-		runthis("INSERT INTO posts VALUES('$user', '$content', 0, NULL, '$saveto')");
-
-	}
-	else
-	{
+		runthis($sql->InsertPost(),['user'=>$user,'content'=>$content,'saveto'=>$saveto]);
+	}else{
 		echo "Error: file type must be .jpg or .png";
-	}
-}
+}}
 ?>
 
 <form method='post' action='timeline.php' enctype='multipart/form-data'>
@@ -37,11 +32,11 @@ if(isset($_POST['content']) && isset($_FILES['photo']['name']))
 </div>
 
 <?php
-$result = runthis('SELECT * FROM posts ORDER BY ID DESC');
-$n = $result->num_rows;
+$result = runthis($sql->ViewPostsIdDesc(),[]);
+$n = $result['num_rows'];
 for($j = 0; $j < $n; $j++)
 {
-	$row = $result->fetch_array(MYSQLI_ASSOC);
+	$row = $result['fetch_array']->fetch();
 	$author = $row['author'];
 	$addr = $row['photo'];
 	$content = $row['content'];
